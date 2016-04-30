@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
-AutoUpdate-Show-In-Client: true
-Bundle-Localization: org/bogza/nodemcuide/Bundle
-Bundle-Name: %OpenIDE-Module-Name
-Bundle-SymbolicName: org.bogza.nodemcuide
-Bundle-Version: 1.0
+OpenIDE-Module: nl.yourdimensions.rs232
+OpenIDE-Module-Layer: nl/yourdimensions/rs232/layer.xml
+OpenIDE-Module-Localizing-Bundle: nl/yourdimensions/rs232/Bundle.properties
+OpenIDE-Module-Requires: org.openide.windows.WindowManager
+OpenIDE-Module-Specification-Version: 1.0
 
