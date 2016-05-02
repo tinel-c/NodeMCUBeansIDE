@@ -12,3 +12,9 @@ Download from: https://netbeans.org/features/index.html
     1. Go to Tools -> Plugins 
     2. Search Markdown Support 
     3. Install
+* Download the current project from GitHub
+    1. File -> Open Project
+    2. Point to the BaseProject from the repository
+    3. Shift + F11 to compile
+    4. Right Click Install
+    5. Done
