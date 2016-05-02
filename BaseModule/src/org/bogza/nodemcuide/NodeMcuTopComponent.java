@@ -12,6 +12,8 @@ import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
 import javax.swing.text.StyledDocument;
+import javax.swing.text.html.HTMLEditorKit;
+import javax.swing.text.html.StyleSheet;
 import nl.yourdimensions.rs232.HexBinOctUtils;
 import nl.yourdimensions.rs232.api.RS232ConnectionAPI;
 import nl.yourdimensions.rs232.events.ConnectedRS232Event;
@@ -51,9 +53,8 @@ import org.openide.util.NbBundle.Messages;
     "HINT_NodeMcuTopComponent=This is a NodeMcu window"
 })
 public final class NodeMcuTopComponent extends TopComponent implements IRS232EventObserver {
-    StyledDocument textNodeMcuPane;
-    StyleContext contextNodeMcuPane;
-    Style styleNodeMcuPane;
+
+    NodeMcuTopComponentTextProcessing outputText;
     public NodeMcuTopComponent() {
         initComponents();
         setName(Bundle.CTL_NodeMcuTopComponent());
@@ -61,19 +62,9 @@ public final class NodeMcuTopComponent extends TopComponent implements IRS232Eve
         putClientProperty(TopComponent.PROP_MAXIMIZATION_DISABLED, Boolean.TRUE);
         
         // try to write topics to the text pane
-        contextNodeMcuPane = new StyleContext();
-        styleNodeMcuPane = contextNodeMcuPane.getStyle(StyleContext.DEFAULT_STYLE);
-        StyleConstants.setAlignment(styleNodeMcuPane, StyleConstants.ALIGN_RIGHT);
-        StyleConstants.setFontSize(styleNodeMcuPane, 9);
-        StyleConstants.setSpaceAbove(styleNodeMcuPane, 4);
-        StyleConstants.setSpaceBelow(styleNodeMcuPane, 4);
-        textNodeMcuPane = jTextPaneNodeMcu.getStyledDocument();
-        
-        try {
-            textNodeMcuPane.insertString(textNodeMcuPane.getLength(),"NodeMCU IDE v1.0 © Constantin Bogza\nwww.bogza.ro\n",styleNodeMcuPane);
-          } catch (BadLocationException badLocationException) {
-            System.err.println("Oops");
-          }
+        outputText = new NodeMcuTopComponentTextProcessing(jTextPaneNodeMcu);
+
+        outputText.SendText("test");
     }
 
     /**
@@ -84,15 +75,12 @@ public final class NodeMcuTopComponent extends TopComponent implements IRS232Eve
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jLabel1 = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTextPaneNodeMcu = new javax.swing.JTextPane();
         jButton2 = new javax.swing.JButton();
         jButton3 = new javax.swing.JButton();
         jButtonReset = new javax.swing.JButton();
-
-        org.openide.awt.Mnemonics.setLocalizedText(jLabel1, org.openide.util.NbBundle.getMessage(NodeMcuTopComponent.class, "NodeMcuTopComponent.jLabel1.text")); // NOI18N
 
         org.openide.awt.Mnemonics.setLocalizedText(jButton1, org.openide.util.NbBundle.getMessage(NodeMcuTopComponent.class, "NodeMcuTopComponent.jButton1.text")); // NOI18N
         jButton1.setActionCommand(org.openide.util.NbBundle.getMessage(NodeMcuTopComponent.class, "NodeMcuTopComponent.jButton1.actionCommand")); // NOI18N
@@ -122,16 +110,13 @@ public final class NodeMcuTopComponent extends TopComponent implements IRS232Eve
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane1)
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jButton1)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jButton2)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jButton3)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jButtonReset)))
+                        .addComponent(jButton1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButton2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButton3)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButtonReset)
                         .addGap(0, 102, Short.MAX_VALUE)))
                 .addContainerGap())
         );
@@ -139,9 +124,7 @@ public final class NodeMcuTopComponent extends TopComponent implements IRS232Eve
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel1)
-                .addGap(18, 18, 18)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 212, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 246, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton1)
@@ -174,7 +157,6 @@ public final class NodeMcuTopComponent extends TopComponent implements IRS232Eve
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButtonReset;
-    private javax.swing.JLabel jLabel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTextPane jTextPaneNodeMcu;
     // End of variables declaration//GEN-END:variables
@@ -208,28 +190,19 @@ public final class NodeMcuTopComponent extends TopComponent implements IRS232Eve
     public void eventListener(IRS232Events ev) {
         if (ev instanceof ConnectedRS232Event) {
             //TODO event connected
-          try {
-            textNodeMcuPane.insertString(textNodeMcuPane.getLength(),"RS232 Connected.\n",styleNodeMcuPane);
-          } catch (BadLocationException badLocationException) {
-            System.err.println("Oops");
-          }
+            outputText.SendDebugText("RS232 Connected");
+
         } else if (ev instanceof DisconnectedRS232Event) {
             //TODO event disconnected
-            try {
-            textNodeMcuPane.insertString(textNodeMcuPane.getLength(),"RS232 Disconected.\n",styleNodeMcuPane);
-          } catch (BadLocationException badLocationException) {
-            System.err.println("Oops");
-          }
+            outputText.SendDebugText("RS232 Disconected");
+
         } else if (ev instanceof DataReceivedRS232Event) {
             DataReceivedRS232Event evt = (DataReceivedRS232Event) ev;
             String RS232data = new String(evt.getData());            
 
             //TODO real data received on RS232
-            try {
-            textNodeMcuPane.insertString(textNodeMcuPane.getLength(),RS232data,styleNodeMcuPane);
-            } catch (BadLocationException badLocationException) {
-              System.err.println("Oops");
-            }
+            outputText.SendText(RS232data);
+
 
        
         }
@@ -237,10 +210,6 @@ public final class NodeMcuTopComponent extends TopComponent implements IRS232Eve
     
     void debugPrint(String debugString)
     {
-        try {
-        textNodeMcuPane.insertString(textNodeMcuPane.getLength(),debugString,styleNodeMcuPane);
-        } catch (BadLocationException badLocationException) {
-          System.err.println("Oops");
-        }
+
     }
 }
