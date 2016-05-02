@@ -17,3 +17,4 @@ Base reuse packages
 Netbeans RS232 communication plugin => https://java.net/projects/nbplugin-avr/downloads
 NodeMCU firmware => https://github.com/nodemcu/nodemcu-firmware/releases
 NodeMCU flasher => https://github.com/nodemcu/nodemcu-flasher
+https://platform.netbeans.org/tutorials/nbm-javacc-lexer.html
