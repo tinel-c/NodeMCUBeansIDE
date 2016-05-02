@@ -5,7 +5,9 @@
  */
 package org.bogza.nodemcuide;
 
+import java.util.Arrays;
 import java.util.regex.Pattern;
+import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.text.StyleContext;
 import javax.swing.text.html.HTMLEditorKit;
@@ -25,9 +27,14 @@ public class NodeMcuTopComponentTextProcessing {
     private HTMLEditorKit htmlEditorKit = new HTMLEditorKit();;
     private StyleSheet htmlStyleSheet;
     private StringBuilder textPaneText = new StringBuilder();
-    public NodeMcuTopComponentTextProcessing(JTextPane jTextPaneHandleParsed)
+    private byte[] dataArray = new byte[2400];
+    private int dataArrayOffset;
+    private JTextField jTextTempHandle;
+    public NodeMcuTopComponentTextProcessing(JTextPane jTextPaneHandleParsed,JTextField jTextTempParsed)
     {
+        dataArrayOffset = 0;
         jTextPaneHandle = jTextPaneHandleParsed;
+        jTextTempHandle = jTextTempParsed;
         jTextPaneHandle.setContentType("text/html");
         htmlStyleSheet = htmlEditorKit.getStyleSheet();
         
@@ -57,5 +64,22 @@ public class NodeMcuTopComponentTextProcessing {
         tempString = Pattern.compile("node").matcher(tempString).replaceAll("<span id='nodeSintax'>node</span>");
         tempString = Pattern.compile("restart").matcher(tempString).replaceAll("<span id='nodeSintax'>restart</span>");
         return tempString;
+    }
+    public void SendBytes(byte[] dataReceived)
+    {
+        for(int i=0; i<dataReceived.length; i++)
+        {
+            dataArray[dataArrayOffset]=dataReceived[i];
+            dataArrayOffset++;
+            if((dataReceived[i] == 10) || (dataArrayOffset > 2000))
+            {
+                String RS232data= new String(dataArray,0,dataArrayOffset); 
+                SendText(RS232data);
+                dataArrayOffset = 0;
+                if(dataArrayOffset > 2000) SendDebugText("Buffer overflow for the input RS232!");
+            }
+        }
+        String RS232dataTemp= new String(dataArray,0,dataArrayOffset); 
+        jTextTempHandle.setText(RS232dataTemp);
     }
 }

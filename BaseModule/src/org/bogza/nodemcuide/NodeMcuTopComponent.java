@@ -62,7 +62,7 @@ public final class NodeMcuTopComponent extends TopComponent implements IRS232Eve
         putClientProperty(TopComponent.PROP_MAXIMIZATION_DISABLED, Boolean.TRUE);
         
         // try to write topics to the text pane
-        outputText = new NodeMcuTopComponentTextProcessing(jTextPaneNodeMcu);
+        outputText = new NodeMcuTopComponentTextProcessing(jTextPaneNodeMcu,jTextFieldTemporaryText);
 
         outputText.SendText("test");
     }
@@ -81,6 +81,7 @@ public final class NodeMcuTopComponent extends TopComponent implements IRS232Eve
         jButton2 = new javax.swing.JButton();
         jButton3 = new javax.swing.JButton();
         jButtonReset = new javax.swing.JButton();
+        jTextFieldTemporaryText = new javax.swing.JTextField();
 
         org.openide.awt.Mnemonics.setLocalizedText(jButton1, org.openide.util.NbBundle.getMessage(NodeMcuTopComponent.class, "NodeMcuTopComponent.jButton1.text")); // NOI18N
         jButton1.setActionCommand(org.openide.util.NbBundle.getMessage(NodeMcuTopComponent.class, "NodeMcuTopComponent.jButton1.actionCommand")); // NOI18N
@@ -101,6 +102,9 @@ public final class NodeMcuTopComponent extends TopComponent implements IRS232Eve
             }
         });
 
+        jTextFieldTemporaryText.setEditable(false);
+        jTextFieldTemporaryText.setText(org.openide.util.NbBundle.getMessage(NodeMcuTopComponent.class, "NodeMcuTopComponent.jTextFieldTemporaryText.text")); // NOI18N
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -117,14 +121,17 @@ public final class NodeMcuTopComponent extends TopComponent implements IRS232Eve
                         .addComponent(jButton3)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButtonReset)
-                        .addGap(0, 102, Short.MAX_VALUE)))
+                        .addGap(0, 102, Short.MAX_VALUE))
+                    .addComponent(jTextFieldTemporaryText))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 246, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 220, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jTextFieldTemporaryText, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton1)
@@ -158,6 +165,7 @@ public final class NodeMcuTopComponent extends TopComponent implements IRS232Eve
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButtonReset;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JTextField jTextFieldTemporaryText;
     private javax.swing.JTextPane jTextPaneNodeMcu;
     // End of variables declaration//GEN-END:variables
     @Override
@@ -197,11 +205,10 @@ public final class NodeMcuTopComponent extends TopComponent implements IRS232Eve
             outputText.SendDebugText("RS232 Disconected");
 
         } else if (ev instanceof DataReceivedRS232Event) {
-            DataReceivedRS232Event evt = (DataReceivedRS232Event) ev;
-            String RS232data = new String(evt.getData());            
+            DataReceivedRS232Event evt = (DataReceivedRS232Event) ev;          
 
             //TODO real data received on RS232
-            outputText.SendText(RS232data);
+            outputText.SendBytes(evt.getData());
 
 
        
